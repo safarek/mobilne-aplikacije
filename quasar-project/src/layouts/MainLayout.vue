@@ -70,7 +70,7 @@ const linksList =
   {
     title: 'Popis Vježbi',
     caption: 'Popis svih dostupnih vježbi',
-    icon: '',
+    icon: 'fitness_center',
     link: '/popisvjezbi'
   },
   {

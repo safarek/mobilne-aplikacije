@@ -1,122 +1,78 @@
 <template>
   <q-page padding>
-    <!-- Pretraga -->
-    <div class="q-mb-md">
+    <div class="q-pa-md">
       <q-input
         v-model="searchQuery"
-        label="Unesite pojam za pretragu"
-        filled
-        class="q-mb-md"
-        debounce="300"
+        label="Unesite Ime ili Specijalnost trenera"
+        outlined
+        clearable
       />
 
-      <div class="q-mb-md">
-        <q-checkbox
-          v-model="searchByName"
-          label="Pretražuj po imenu"
-        />
-        <q-checkbox
-          v-model="searchBySpecialty"
-          label="Pretražuj po specijalnosti"
-        />
+      <div class="q-my-md">
+        <q-checkbox v-model="searchByName" label="Pretraži po imenu" />
+        <q-checkbox v-model="searchBySpeciality" label="Pretraži po specijalnosti" />
       </div>
 
-      <q-btn @click="performSearch" label="Traži" color="primary" />
+      <q-btn label="Traži" color="primary" @click="performSearch" />
 
-      <!-- Tablica sa rezultatima -->
       <q-table
-        :rows="filteredTrainers"
+        v-if="filteredTreners.length"
+        :rows="filteredTreners"
         :columns="columns"
         row-key="id"
+        title="Rezultati Pretraživanja"
         class="q-mt-md"
-      >
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td :props="props" prop="name" />
-            <q-td :props="props" prop="specialty" />
-            <q-td :props="props" prop="experience" />
-          </q-tr>
-        </template>
-      </q-table>
+      />
     </div>
   </q-page>
 </template>
 
 <script>
-import { ref, computed, watch } from "vue";
+import { ref } from 'vue';
 
 export default {
-  name: "PretrazivanjeTrenera",
   setup() {
-    // Dummy podaci za fitness trenere
-    const trainers = ref([
-      { id: 1, name: "Marko Horvat", specialty: "Kardio", experience: "5 godina" },
-      { id: 2, name: "Ana Novak", specialty: "Yoga", experience: "3 godine" },
-      { id: 3, name: "Ivan Kovačić", specialty: "Snaga i kondicija", experience: "7 godina" },
-      { id: 4, name: "Lucija Matić", specialty: "Pilates", experience: "4 godine" },
-    ]);
-
-    // Statička pretraga
-    const searchQuery = ref("");
+    const searchQuery = ref('');
     const searchByName = ref(true);
-    const searchBySpecialty = ref(false);
+    const searchBySpeciality = ref(false);
 
-    // Kolone tablice
     const columns = [
-      { name: "name", label: "Ime", required: true, align: "left", field: "name" },
-      { name: "specialty", label: "Specijalnost", required: true, align: "left", field: "specialty" },
-      { name: "experience", label: "Iskustvo", required: false, align: "left", field: "experience" },
+      { name: 'id', label: 'ID', align: 'left', field: row => row.id },
+      { name: 'ime', label: 'Ime', align: 'left', field: row => row.ime },
+      { name: 'specijalnost', label: 'Specijalnost', align: 'left', field: row => row.speciality },
+      { name: 'experience', label: 'Experience', align: 'left', field: row => row.experience },
     ];
 
-    // Funkcija za obavljanje pretrage
+    const treners = [
+      { id: 1, ime: 'Marko Horvat', speciality: 'Kardio', experience: '5 godina.' },
+      { id: 2, ime: 'Ana Novak', speciality: 'Yoga', experience: '3 godine.' },
+      { id: 3, ime: 'Ivan Kovačić', speciality: 'Snaga i kondicija', experience: '7 godina.' },
+      { id: 4, ime: 'Lucija Matić', speciality: 'Pilates', experience: '4 godine.' }
+    ];
+
+    const filteredTreners = ref([]);
+
     const performSearch = () => {
-      console.log("Performing search with query:", searchQuery.value);
-      filteredTrainers.value = trainers.value.filter((trainer) => {
-        const searchText = searchQuery.value.toLowerCase();
-        let matches = false;
-
-        // Ako je odabrano pretraživanje po imenu
-        if (searchByName.value && trainer.name.toLowerCase().includes(searchText)) {
-          matches = true;
-        }
-
-        // Ako je odabrano pretraživanje po specijalnosti
-        if (searchBySpecialty.value && trainer.specialty.toLowerCase().includes(searchText)) {
-          matches = true;
-        }
-
-        return matches;
+      if (!searchQuery.value) {
+        filteredTreners.value = [];
+        return;
+      }
+      filteredTreners.value = treners.filter(trener => {
+        const matchesName = searchByName.value && trener.ime.toLowerCase().includes(searchQuery.value.toLowerCase());
+        const matchesSpeciality = searchBySpeciality.value && trener.speciality.toLowerCase().includes(searchQuery.value.toLowerCase());
+        return matchesName || matchesSpeciality;
       });
-      console.log("Filtered trainers:", filteredTrainers.value);
     };
-
-    // Reaktivno praćenje promjena unosa u pretragu
-    const filteredTrainers = ref(trainers.value);
-
-    // Watch za praćenje promjena unosa i checkboxova
-    watch([searchQuery, searchByName, searchBySpecialty], () => {
-      performSearch(); // Automatski pokreće pretragu kad god se promijene ovi podaci
-    });
 
     return {
       searchQuery,
       searchByName,
-      searchBySpecialty,
+      searchBySpeciality,
       columns,
-      filteredTrainers,
-      performSearch,
+      treners,
+      filteredTreners,
+      performSearch
     };
-  },
+  }
 };
 </script>
-
-<style scoped>
-/* Stilizacija inputa i tablice */
-.q-table {
-  min-height: 300px;
-}
-
-.q-checkbox {
-  margin-right: 20px;
-}
-</style>
